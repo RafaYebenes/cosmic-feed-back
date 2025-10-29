@@ -6,6 +6,7 @@ from services.forum_service import (
     delete_post,
     get_comments_by_post,
     create_comment,
+    update_post_votes
 )
 from services.auth_guard import verify_supabase_token
 
@@ -92,3 +93,15 @@ def remove_post(post_id):
         return jsonify({"message": "Post eliminado"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@forum_bp.route("/posts/<post_id>/vote", methods=["POST"])
+@verify_supabase_token
+def vote_post(post_id):
+    try:
+        data = request.get_json()
+        delta = int(data.get("delta", 0))
+        updated_post = update_post_votes(post_id, delta)
+        return jsonify(updated_post), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
